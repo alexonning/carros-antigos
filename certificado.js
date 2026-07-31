@@ -20,10 +20,10 @@ const CAMPOS = {
   telefone:     { x: 405, y: 652 }
 };
 /* Quadrados dos checkboxes (centro), medidos na imagem */
-const CHECK_SIM = { x: 500, y: 734 };
-const CHECK_NAO = { x: 728, y: 734 };
+const CHECK_SIM = { x: 500, y: 727 };
+const CHECK_NAO = { x: 728, y: 727 };
 /* Linha do "Nº DO VEÍCULO:" no rodapé */
-const NUM_POS = { x: 690, y: 802 };
+const NUM_POS = { x: 700, y: 782 };
 
 /* carrega a arte uma vez e reaproveita */
 let _fichaImg = null;
@@ -31,9 +31,17 @@ function carregarFicha(){
   if (_fichaImg) return Promise.resolve(_fichaImg);
   return new Promise((resolve, reject) => {
     const img = new Image();
+    // evita "canvas tainted" ao exportar o PDF
+    img.crossOrigin = 'anonymous';
     img.onload = () => { _fichaImg = img; resolve(img); };
-    img.onerror = () => reject(new Error('Não foi possível carregar a arte da ficha (ficha-modelo.jpg).'));
-    img.src = FICHA_IMG + '?v=1';
+    img.onerror = () => {
+      // tenta de novo sem crossOrigin (mesma origem não precisa)
+      const img2 = new Image();
+      img2.onload = () => { _fichaImg = img2; resolve(img2); };
+      img2.onerror = () => reject(new Error('Não foi possível carregar a arte da ficha (ficha-modelo.jpg). Verifique se o arquivo está na mesma pasta do site.'));
+      img2.src = FICHA_IMG;
+    };
+    img.src = FICHA_IMG;
   });
 }
 
@@ -88,7 +96,9 @@ async function renderFichaCanvas(car, numero){
     ctx.font = "700 26px Georgia, serif";
     ctx.fillStyle = '#D96A33';
     ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'center';
     ctx.fillText(String(numero).padStart(3,'0'), NUM_POS.x, NUM_POS.y);
+    ctx.textAlign = 'left';
   }
 
   return canvas;

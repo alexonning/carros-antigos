@@ -408,6 +408,7 @@ async function gerarParaLista(lista){
       : '✓ Ficha gerada — baixando o PDF.', 'ok');
   } catch (err){
     closeGen();
+    console.error('Falha ao gerar ficha:', err);
     toast('Erro ao gerar: ' + (err.message || err), 'err');
   }
 }
