@@ -23,7 +23,7 @@ const CAMPOS = {
 const CHECK_SIM = { x: 500, y: 727 };
 const CHECK_NAO = { x: 728, y: 727 };
 /* Linha do "Nº DO VEÍCULO:" no rodapé */
-const NUM_POS = { x: 700, y: 782 };
+const NUM_POS = { x: 700, y: 780 };
 
 /* carrega a arte uma vez e reaproveita */
 let _fichaImg = null;
