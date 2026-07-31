@@ -420,12 +420,31 @@ textarea{resize:vertical;min-height:96px}
 .success-card h2{font-family:'Yellowtail',cursive;font-size:2.2rem;color:var(--teal-dark);margin-bottom:6px}
 .success-card p{color:var(--ink-soft);font-size:.95rem;line-height:1.6;margin-bottom:22px}
 
-/* ================= CAIXA DE COMPARTILHAR LINK PÚBLICO ================= */
-.share-box{
-  max-width:640px;margin:0 auto 18px;
-  background:rgba(47,140,140,.1);border:2px dashed var(--teal);border-radius:12px;
-  padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+
+
+
+
+
+/* ================= GERAR FICHAS ================= */
+.gen-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  background:rgba(217,106,51,.1);border:2px dashed var(--orange);border-radius:12px;
+  padding:12px 16px;margin-bottom:22px;
 }
-.share-box b{display:block;font-family:'Alfa Slab One',serif;font-size:.92rem;color:var(--teal-dark)}
-.share-box span{font-size:.82rem;color:var(--ink-soft)}
-.share-box .btn-sm{flex:0 0 auto}
+.gen-info{font-family:'Special Elite',monospace;font-size:.82rem;color:var(--ink-soft)}
+.btn-gen{
+  background:var(--orange);color:#fff;box-shadow:0 3px 0 #A44A1E;flex:0 0 auto;
+}
+.btn-gen:hover:not(:disabled){background:#E37B45}
+.gen-overlay{
+  display:none;position:fixed;inset:0;z-index:400;
+  background:rgba(30,27,23,.6);align-items:center;justify-content:center;padding:24px;
+}
+.gen-overlay.open{display:flex}
+.gen-card{
+  background:var(--cream);border:3px solid var(--ink);border-radius:16px;
+  box-shadow:var(--shadow);padding:30px 34px;text-align:center;max-width:340px;
+}
+.gen-card .spinner{width:34px;height:34px;border-width:4px;border-color:rgba(43,33,24,.2);border-top-color:var(--orange);margin:0 auto 14px}
+.gen-card p{font-family:'Special Elite',monospace;font-size:.9rem;color:var(--ink)}
+.gen-card .gen-count{font-size:1.4rem;color:var(--rust);font-weight:700;margin-top:4px}

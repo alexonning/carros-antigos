@@ -235,6 +235,7 @@ function updateCount(){
 function render(){
   const list = filteredCars();
   updateCount();
+  updateGenInfo(list.length);
   $('emptyState').style.display = list.length ? 'none' : 'block';
   $('results').innerHTML = list.map(c => `
     <article class="car-card">
@@ -355,6 +356,72 @@ $('modalPresence').addEventListener('click', e => {
   if (modalCarId) togglePresence(modalCarId, e.currentTarget);
 });
 $('modalEdit').addEventListener('click', () => { if (modalCarId) startEdit(modalCarId); });
+
+/* =====================================================================
+   GERAÇÃO DE FICHAS / CERTIFICADOS
+   ===================================================================== */
+
+/* numera cada carro conforme a ordem de cadastro (mais antigo = 1) */
+function numeroDoCarro(car){
+  const ordenados = [...cars].sort((a,b) =>
+    new Date(a.criado_em || 0) - new Date(b.criado_em || 0));
+  const idx = ordenados.findIndex(c => c.id === car.id);
+  return idx >= 0 ? idx + 1 : 1;
+}
+
+function updateGenInfo(n){
+  const el = $('genInfo');
+  const btn = $('genBatchBtn');
+  if (!el || !btn) return;
+  if (!n){
+    el.textContent = 'Nenhum carro nos resultados atuais.';
+    btn.disabled = true;
+  } else {
+    el.textContent = n === 1
+      ? 'Gerar a ficha do carro exibido abaixo.'
+      : `Gerar as fichas dos ${n} carros exibidos abaixo` +
+        (cars.length !== n ? ' (conforme busca/filtro).' : '.');
+    btn.disabled = false;
+  }
+}
+
+const genOverlay = $('genOverlay');
+function openGen(msg){
+  $('genMsg').textContent = msg || 'Gerando fichas…';
+  $('genCount').textContent = '';
+  genOverlay.classList.add('open');
+}
+function closeGen(){ genOverlay.classList.remove('open'); }
+
+async function gerarParaLista(lista){
+  if (!lista.length){ toast('Nenhum carro para gerar.', 'err'); return; }
+  const comNumero = lista.map(c => ({ ...c, __numero: numeroDoCarro(c) }));
+  const multiplos = comNumero.length > 1;
+  openGen(multiplos ? 'Gerando fichas…' : 'Gerando ficha…');
+  try {
+    const res = await window.Fichas.gerarFichas(comNumero, (feito, total) => {
+      $('genCount').textContent = `${feito} de ${total}`;
+    });
+    closeGen();
+    toast(res.zipped
+      ? `✓ ${res.count} fichas geradas — baixando o .zip.`
+      : '✓ Ficha gerada — baixando o PDF.', 'ok');
+  } catch (err){
+    closeGen();
+    toast('Erro ao gerar: ' + (err.message || err), 'err');
+  }
+}
+
+/* botão do modal — ficha individual */
+$('modalCert').addEventListener('click', () => {
+  const c = cars.find(x => x.id === modalCarId);
+  if (c) gerarParaLista([c]);
+});
+
+/* botão em lote — respeita busca + filtro de presença ativos */
+$('genBatchBtn').addEventListener('click', () => {
+  gerarParaLista(filteredCars());
+});
 
 /* exclusão com confirmação em dois toques */
 const deleteBtn = $('modalDelete');
@@ -575,17 +642,6 @@ carForm.addEventListener('submit', async e => {
   } finally {
     setBusy(btn, false);
     setFormMode();
-  }
-});
-
-/* ---------------- copiar link público ---------------- */
-$('shareBtn').addEventListener('click', async () => {
-  const url = new URL('cadastro', location.href).href;
-  try {
-    await navigator.clipboard.writeText(url);
-    toast('✓ Link copiado! Cole no WhatsApp ou redes.', 'ok');
-  } catch (_){
-    toast(url, '');
   }
 });
 

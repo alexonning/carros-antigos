@@ -119,6 +119,10 @@
         <button class="chip" data-filter="present" aria-pressed="false">Presentes</button>
         <button class="chip" data-filter="absent" aria-pressed="false">Aguardando</button>
       </div>
+      <div class="gen-bar">
+        <span class="gen-info" id="genInfo">Gere as fichas dos carros exibidos abaixo.</span>
+        <button type="button" class="btn btn-sm btn-gen" id="genBatchBtn">Gerar fichas dos resultados</button>
+      </div>
       <div class="results" id="results"></div>
       <div class="empty" id="emptyState" style="display:none">
         <span class="script">Nenhum carro por aqui…</span>
@@ -128,13 +132,6 @@
 
     <!-- ------ CADASTRO ------ -->
     <section class="panel" id="panelRegister" role="tabpanel" aria-labelledby="tabRegister">
-      <div class="share-box">
-        <div>
-          <b>Link público para visitantes</b>
-          <span>Compartilhe para que os donos cadastrem os próprios carros.</span>
-        </div>
-        <button type="button" class="btn btn-sm btn-detail" id="shareBtn">Copiar link</button>
-      </div>
       <form class="form-card" id="carForm" novalidate>
         <h2 id="formTitle">Novo carro</h2>
         <p class="form-sub" id="formSub">Ficha de inscrição do veículo</p>
@@ -221,17 +218,30 @@
     <p class="modal-desc" id="modalDesc"></p>
     <div class="modal-actions">
       <button class="btn btn-sm btn-checkin" id="modalPresence"></button>
+      <button class="btn btn-sm btn-gen" id="modalCert">Gerar ficha</button>
       <button class="btn btn-sm btn-detail" id="modalEdit">Editar</button>
       <button class="btn btn-sm btn-danger" id="modalDelete">Excluir cadastro</button>
     </div>
   </div>
 </div>
 
+<div class="gen-overlay" id="genOverlay">
+  <div class="gen-card">
+    <div class="spinner"></div>
+    <p id="genMsg">Gerando fichas…</p>
+    <p class="gen-count" id="genCount"></p>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg2pdf.js@2.2.3/dist/svg2pdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="config.js"></script>
 <script src="shared.js"></script>
+<script src="certificado.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
