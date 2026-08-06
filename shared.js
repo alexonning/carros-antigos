@@ -2,6 +2,9 @@
    Helpers compartilhados (usados pela página pública e pela interna)
    ===================================================================== */
 
+/* Tamanho mínimo do nome do proprietário */
+const MIN_PROPRIETARIO = 6;
+
 /* Máscara de telefone: (DD) 9XXXX-XXXX ou (DD) XXXX-XXXX */
 function formatPhone(value){
   const d = (value || '').replace(/\D/g, '').slice(0, 11);

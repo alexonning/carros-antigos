@@ -89,6 +89,7 @@
   <nav class="tabs" role="tablist" aria-label="Seções">
     <button class="tab" role="tab" id="tabSearch" aria-selected="true" aria-controls="panelSearch">Pesquisar</button>
     <button class="tab" role="tab" id="tabRegister" aria-selected="false" aria-controls="panelRegister">Cadastrar carro</button>
+    <button class="tab" role="tab" id="tabRaffle" aria-selected="false" aria-controls="panelRaffle">Sorteio</button>
   </nav>
 
   <main class="page">
@@ -96,21 +97,20 @@
     <section class="panel active" id="panelSearch" role="tabpanel" aria-labelledby="tabSearch">
       <div class="search-head">
         <h2>Encontre o carro</h2>
-        <p>Busque por placa, modelo, cor ou dono e confirme a chegada no evento.</p>
+        <p>Busque pela placa ou pelo nome do proprietário e confirme a chegada no evento.</p>
       </div>
       <div class="search-row">
         <div class="field">
           <label for="searchInput">Buscar</label>
-          <input id="searchInput" type="search" placeholder="Ex.: ABC-1234, Fusca, azul, João…">
+          <input id="searchInput" type="search" placeholder="Ex.: ABC-1234 ou João da Silva…">
         </div>
         <div class="field">
-          <label for="searchField">Campo</label>
-          <select id="searchField">
-            <option value="all">Todos os campos</option>
-            <option value="placa">Placa</option>
-            <option value="modelo">Modelo</option>
-            <option value="cor">Cor</option>
-            <option value="dono">Dono</option>
+          <label for="sortOrder">Ordenar por</label>
+          <select id="sortOrder">
+            <option value="cad-asc">Cadastro — 1º ao último</option>
+            <option value="cad-desc">Cadastro — último ao 1º</option>
+            <option value="pres-asc">Presença — 1º ao último</option>
+            <option value="pres-desc">Presença — último ao 1º</option>
           </select>
         </div>
       </div>
@@ -158,7 +158,8 @@
           </div>
           <div class="field">
             <label for="fProprietario">Proprietário *</label>
-            <input id="fProprietario" type="text" placeholder="Nome completo" required>
+            <input id="fProprietario" type="text" placeholder="Nome completo" minlength="6" required>
+            <span class="hint">Mínimo de 6 caracteres</span>
           </div>
           <div class="field">
             <label for="fCidade">Cidade *</label>
@@ -199,6 +200,37 @@
           <button type="button" class="btn btn-ghost" id="clearFormBtn">Limpar</button>
         </div>
       </form>
+    </section>
+
+    <!-- ------ SORTEIO ------ -->
+    <section class="panel" id="panelRaffle" role="tabpanel" aria-labelledby="tabRaffle">
+      <div class="search-head">
+        <h2>Sorteio de prêmios</h2>
+        <p>Sorteie um carro entre os participantes. Quem já foi sorteado não entra de novo.</p>
+      </div>
+
+      <div class="chips" role="group" aria-label="Quem participa do sorteio">
+        <button class="chip" data-pool="present" aria-pressed="true">Somente presentes</button>
+        <button class="chip" data-pool="all" aria-pressed="false">Todos os cadastrados</button>
+      </div>
+
+      <div class="raffle-stage">
+        <p class="raffle-pool" id="rafflePool">—</p>
+        <div class="raffle-display" id="raffleDisplay" aria-live="polite">
+          <span class="raffle-idle">Toque em <b>Sortear</b> para começar</span>
+        </div>
+        <button type="button" class="btn btn-raffle" id="raffleBtn">🎲 Sortear</button>
+      </div>
+
+      <div class="raffle-list-head">
+        <h3>Carros sorteados</h3>
+        <button type="button" class="btn-clear-raffle" id="raffleClearBtn">Limpar tudo</button>
+      </div>
+      <div class="raffle-list" id="raffleList"></div>
+      <div class="empty" id="raffleEmpty">
+        <span class="script">Nenhum sorteado ainda…</span>
+        <p>Os ganhadores aparecem aqui.</p>
+      </div>
     </section>
   </main>
 </div>

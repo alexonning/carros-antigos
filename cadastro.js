@@ -131,6 +131,10 @@ $('carForm').addEventListener('submit', async e => {
   if (!placa || !modelo || !cor || !ano || !proprietario || !cidade || !telefone){
     showMsg('err','✕ Preencha todos os campos obrigatórios (*).'); return;
   }
+  if (proprietario.length < MIN_PROPRIETARIO){
+    showMsg('err', `✕ O nome do proprietário deve ter no mínimo ${MIN_PROPRIETARIO} caracteres.`);
+    $('fProprietario').focus(); return;
+  }
   if (!isValidPhone(telefone)){
     showMsg('err','✕ Telefone inválido. Use DDD + número, ex.: (46) 99999-9999.'); return;
   }

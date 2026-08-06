@@ -208,17 +208,72 @@ async function removePhotos(paths){
 /* =====================================================================
    4. RENDERIZAÇÃO
    ===================================================================== */
+/* busca genérica: placa ou nome do proprietário (inclui o apelido "dono") */
 function filteredCars(){
   const q = norm($('searchInput').value.trim());
-  const field = $('searchField').value;
-  return cars.filter(c => {
+  const achados = cars.filter(c => {
     if (presenceFilter === 'present' && !c.presente) return false;
     if (presenceFilter === 'absent' && c.presente) return false;
     if (!q) return true;
-    if (field === 'all')
-      return [c.placa, c.modelo, c.cor, c.dono].some(v => norm(v).includes(q));
-    return norm(c[field]).includes(q);
+    return [c.placa, c.proprietario, c.dono].some(v => norm(v).includes(q));
   });
+  return sortCars(achados);
+}
+
+/* ordena pela ordem de cadastro ou pela ordem de presença.
+   Quem ainda não confirmou presença fica sempre no fim da lista. */
+function sortCars(list){
+  const mode = $('sortOrder').value;
+  const cad = c => ordemCadastroMap.get(c.id) ?? Number.MAX_SAFE_INTEGER;
+  const arr = [...list];
+
+  if (mode === 'cad-asc' || mode === 'cad-desc'){
+    arr.sort((a,b) => cad(a) - cad(b));
+    if (mode === 'cad-desc') arr.reverse();
+    return arr;
+  }
+
+  const pres = c => ordemPresencaMap.get(c.id) ?? Infinity;
+  arr.sort((a,b) => {
+    const pa = pres(a), pb = pres(b);
+    if (pa === Infinity && pb === Infinity) return cad(a) - cad(b);
+    if (pa === Infinity) return 1;
+    if (pb === Infinity) return -1;
+    return mode === 'pres-asc' ? pa - pb : pb - pa;
+  });
+  return arr;
+}
+
+/* ---------- ordem de cadastro e ordem de presença ----------
+   Ambas são derivadas das datas, então não dependem do banco:
+   criado_em  -> 1º cadastrado, 2º cadastrado…
+   checkin_em -> 1º presente,   2º presente…               */
+let ordemCadastroMap = new Map();
+let ordemPresencaMap = new Map();
+
+const ts = v => { const t = v ? new Date(v).getTime() : NaN;
+                  return Number.isNaN(t) ? Number.MAX_SAFE_INTEGER : t; };
+
+function computeOrders(){
+  ordemCadastroMap = new Map(
+    [...cars]
+      .sort((a,b) => ts(a.criado_em) - ts(b.criado_em))
+      .map((c,i) => [c.id, i+1]));
+
+  ordemPresencaMap = new Map(
+    cars.filter(c => c.presente)
+      .sort((a,b) => (ts(a.checkin_em) - ts(b.checkin_em)) || (ts(a.criado_em) - ts(b.criado_em)))
+      .map((c,i) => [c.id, i+1]));
+}
+
+function ordemBadges(c){
+  const cad = ordemCadastroMap.get(c.id);
+  const pre = ordemPresencaMap.get(c.id);
+  if (!cad && !pre) return '';
+  return `<div class="ordem-badges">
+      ${cad ? `<span class="ord-badge ord-cad">${cad}º cadastrado</span>` : ''}
+      ${pre ? `<span class="ord-badge ord-pre">${pre}º presente</span>` : ''}
+    </div>`;
 }
 
 function renderSkeleton(){
@@ -233,9 +288,11 @@ function updateCount(){
 }
 
 function render(){
+  computeOrders();
   const list = filteredCars();
   updateCount();
   updateGenInfo(list.length);
+  renderRaffle();
   $('emptyState').style.display = list.length ? 'none' : 'block';
   $('results').innerHTML = list.map(c => `
     <article class="car-card">
@@ -249,6 +306,7 @@ function render(){
       </div>
       <div class="car-body">
         <span class="plate">${escapeHtml(c.placa)}</span>
+        ${ordemBadges(c)}
         <div class="car-model">${escapeHtml(c.modelo)} · ${c.ano}</div>
         <div class="car-meta">
           <span><b>Cor:</b> ${escapeHtml(c.cor)}</span>
@@ -273,17 +331,18 @@ $('results').addEventListener('click', e => {
 });
 
 $('searchInput').addEventListener('input', render);
-$('searchField').addEventListener('change', render);
-document.querySelectorAll('.chip').forEach(chip => {
+$('sortOrder').addEventListener('change', render);
+document.querySelectorAll('#panelSearch .chip').forEach(chip => {
   chip.addEventListener('click', () => {
     presenceFilter = chip.dataset.filter;
-    document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === chip));
+    document.querySelectorAll('#panelSearch .chip')
+      .forEach(c => c.setAttribute('aria-pressed', c === chip));
     render();
   });
 });
 
 /* ---------------- abas ---------------- */
-const tabs = { tabSearch:'panelSearch', tabRegister:'panelRegister' };
+const tabs = { tabSearch:'panelSearch', tabRegister:'panelRegister', tabRaffle:'panelRaffle' };
 function switchTab(tid){
   Object.entries(tabs).forEach(([t,p]) => {
     const sel = t === tid;
@@ -336,8 +395,13 @@ function fillModal(c){
   const quando = c.checkin_em
     ? new Date(c.checkin_em).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})
     : null;
+  const ordCad = ordemCadastroMap.get(c.id);
+  const ordPre = ordemPresencaMap.get(c.id);
   $('modalMeta').innerHTML =
-    `<span><b>Cor:</b> ${escapeHtml(c.cor)}</span>
+    `${ordemBadges(c)}
+     <span><b>Ordem de cadastro:</b> ${ordCad ? ordCad + 'º cadastrado' : '—'}</span>
+     <span><b>Ordem de presença:</b> ${ordPre ? ordPre + 'º presente' : 'ainda não confirmou'}</span>
+     <span><b>Cor:</b> ${escapeHtml(c.cor)}</span>
      <span><b>Dono:</b> ${escapeHtml(c.dono)}</span>
      ${c.proprietario ? `<span><b>Proprietário:</b> ${escapeHtml(c.proprietario)}</span>` : ''}
      ${c.cidade ? `<span><b>Cidade:</b> ${escapeHtml(c.cidade)}</span>` : ''}
@@ -363,10 +427,7 @@ $('modalEdit').addEventListener('click', () => { if (modalCarId) startEdit(modal
 
 /* numera cada carro conforme a ordem de cadastro (mais antigo = 1) */
 function numeroDoCarro(car){
-  const ordenados = [...cars].sort((a,b) =>
-    new Date(a.criado_em || 0) - new Date(b.criado_em || 0));
-  const idx = ordenados.findIndex(c => c.id === car.id);
-  return idx >= 0 ? idx + 1 : 1;
+  return ordemCadastroMap.get(car.id) ?? 1;
 }
 
 function updateGenInfo(n){
@@ -395,6 +456,7 @@ function closeGen(){ genOverlay.classList.remove('open'); }
 
 async function gerarParaLista(lista){
   if (!lista.length){ toast('Nenhum carro para gerar.', 'err'); return; }
+  computeOrders();
   const comNumero = lista.map(c => ({ ...c, __numero: numeroDoCarro(c) }));
   const multiplos = comNumero.length > 1;
   openGen(multiplos ? 'Gerando fichas…' : 'Gerando ficha…');
@@ -592,6 +654,10 @@ carForm.addEventListener('submit', async e => {
   if (!placa || !modelo || !cor || !dono || !ano || !proprietario || !cidade || !telefone){
     showMsg('err','✕ Preencha todos os campos obrigatórios (*).'); return;
   }
+  if (proprietario.length < MIN_PROPRIETARIO){
+    showMsg('err', `✕ O nome do proprietário deve ter no mínimo ${MIN_PROPRIETARIO} caracteres.`);
+    $('fProprietario').focus(); return;
+  }
   if (!isValidPhone(telefone)){
     showMsg('err','✕ Telefone inválido. Use DDD + número, ex.: (46) 99999-9999.'); return;
   }
@@ -646,7 +712,166 @@ carForm.addEventListener('submit', async e => {
   }
 });
 
+/* =====================================================================
+   8. SORTEADOR DE PRÊMIOS
+   Os ganhadores ficam salvos neste navegador (localStorage), então o
+   sorteio sobrevive a um F5 sem precisar mexer no banco.
+   ===================================================================== */
+const LS_RAFFLE = 'carros_sorteio';
+
+let rafflePool = 'present';     // 'present' = só quem confirmou presença
+let raffleWinners = [];         // ids na ordem em que foram sorteados
+let raffleSpinning = false;
+
+(function loadWinners(){
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_RAFFLE) || '[]');
+    if (Array.isArray(saved)) raffleWinners = saved.filter(id => typeof id === 'string');
+  } catch (_) {}
+})();
+
+function saveWinners(){
+  try { localStorage.setItem(LS_RAFFLE, JSON.stringify(raffleWinners)); } catch (_) {}
+}
+
+/* carros que ainda podem ser sorteados */
+function raffleCandidates(){
+  return cars.filter(c =>
+    !raffleWinners.includes(c.id) &&
+    (rafflePool === 'all' || c.presente));
+}
+
+/* sorteio uniforme usando o gerador criptográfico do navegador */
+function pickRandom(list){
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return list[buf[0] % list.length];
+}
+
+function raffleCarLine(c){
+  const cad = ordemCadastroMap.get(c.id);
+  const pre = ordemPresencaMap.get(c.id);
+  return `<span class="rf-plate">${escapeHtml(c.placa)}</span>
+    <span class="rf-model">${escapeHtml(c.modelo)} · ${c.ano}</span>
+    <span class="rf-owner">${escapeHtml(c.proprietario || c.dono)}${c.cidade ? ' — ' + escapeHtml(c.cidade) : ''}</span>
+    <span class="rf-ords">${cad ? `${cad}º cadastrado` : ''}${cad && pre ? ' · ' : ''}${pre ? `${pre}º presente` : ''}</span>`;
+}
+
+function showRaffleWinner(c){
+  $('raffleDisplay').innerHTML =
+    `<div class="rf-winner">
+       <span class="rf-tag">Sorteado!</span>
+       ${raffleCarLine(c)}
+     </div>`;
+}
+
+function renderRaffle(){
+  const disponiveis = raffleCandidates();
+  const poolEl = $('rafflePool');
+  const btn = $('raffleBtn');
+  if (!poolEl || !btn) return;
+
+  poolEl.textContent = disponiveis.length
+    ? `${disponiveis.length} ${disponiveis.length === 1 ? 'carro concorrendo' : 'carros concorrendo'}` +
+      (rafflePool === 'present' ? ' (presentes)' : ' (todos os cadastrados)')
+    : (rafflePool === 'present'
+        ? 'Nenhum carro presente disponível para sortear.'
+        : 'Todos os carros já foram sorteados.');
+  btn.disabled = !disponiveis.length || raffleSpinning;
+
+  const ganhadores = raffleWinners
+    .map(id => cars.find(c => c.id === id))
+    .filter(Boolean);
+
+  $('raffleEmpty').style.display = ganhadores.length ? 'none' : 'block';
+  $('raffleList').innerHTML = ganhadores.map((c,i) => `
+    <div class="rf-row">
+      <span class="rf-pos">${i+1}º</span>
+      <div class="rf-info">${raffleCarLine(c)}</div>
+      <button type="button" class="rf-remove" data-raffle-remove="${c.id}"
+              aria-label="Remover ${escapeHtml(c.placa)} da lista de sorteados">✕</button>
+    </div>`).join('');
+}
+
+async function drawWinner(){
+  if (raffleSpinning) return;
+  const disponiveis = raffleCandidates();
+  if (!disponiveis.length){ toast('Nenhum carro disponível para sortear.', 'err'); return; }
+
+  raffleSpinning = true;
+  $('raffleBtn').disabled = true;
+  const display = $('raffleDisplay');
+  display.classList.add('spinning');
+
+  // suspense: passa rapidamente por candidatos aleatórios
+  const passos = Math.min(14, Math.max(6, disponiveis.length));
+  for (let i = 0; i < passos; i++){
+    const previa = pickRandom(disponiveis);
+    display.innerHTML = `<div class="rf-winner rf-preview">${raffleCarLine(previa)}</div>`;
+    await new Promise(r => setTimeout(r, 70 + i * 14));
+  }
+
+  const vencedor = pickRandom(disponiveis);
+  display.classList.remove('spinning');
+  showRaffleWinner(vencedor);
+
+  raffleWinners.push(vencedor.id);
+  saveWinners();
+  raffleSpinning = false;
+  renderRaffle();
+  toast(`🎉 ${vencedor.placa} — ${vencedor.modelo} foi sorteado!`, 'ok');
+}
+
+$('raffleBtn').addEventListener('click', drawWinner);
+
+$('raffleList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-raffle-remove]');
+  if (!btn) return;
+  const id = btn.dataset.raffleRemove;
+  const c = cars.find(x => x.id === id);
+  raffleWinners = raffleWinners.filter(w => w !== id);
+  saveWinners();
+  renderRaffle();
+  toast(c ? `${c.placa} voltou para o sorteio.` : 'Removido da lista.');
+});
+
+document.querySelectorAll('#panelRaffle [data-pool]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    rafflePool = chip.dataset.pool;
+    document.querySelectorAll('#panelRaffle [data-pool]')
+      .forEach(c => c.setAttribute('aria-pressed', c === chip));
+    renderRaffle();
+  });
+});
+
+/* limpar tudo com confirmação em dois toques */
+const raffleClearBtn = $('raffleClearBtn');
+let clearArmed = false, clearTimer = null;
+function resetClearBtn(){
+  clearArmed = false;
+  clearTimeout(clearTimer);
+  raffleClearBtn.textContent = 'Limpar tudo';
+  raffleClearBtn.classList.remove('armed');
+}
+raffleClearBtn.addEventListener('click', () => {
+  if (!raffleWinners.length){ toast('A lista já está vazia.'); return; }
+  if (!clearArmed){
+    clearArmed = true;
+    raffleClearBtn.textContent = 'Toque de novo para limpar';
+    raffleClearBtn.classList.add('armed');
+    clearTimer = setTimeout(resetClearBtn, 4000);
+    return;
+  }
+  raffleWinners = [];
+  saveWinners();
+  resetClearBtn();
+  $('raffleDisplay').innerHTML = '<span class="raffle-idle">Toque em <b>Sortear</b> para começar</span>';
+  renderRaffle();
+  toast('Lista de sorteados limpa.', 'ok');
+});
+
 /* ---------------- start ---------------- */
 setFormMode();
 setVenda(false);
+renderRaffle();
 boot();

@@ -202,7 +202,7 @@ input,select,textarea{font-family:'Archivo',sans-serif;font-size:1rem;color:var(
 .search-head p{color:var(--ink-soft);margin:2px 0 18px;font-size:.95rem}
 .search-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .search-row .field{flex:1;min-width:220px;margin:0}
-.search-row select{max-width:200px}
+.search-row select{max-width:270px}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
 .chip{
   min-height:44px;padding:9px 18px;border-radius:999px;
@@ -448,3 +448,142 @@ textarea{resize:vertical;min-height:96px}
 .gen-card .spinner{width:34px;height:34px;border-width:4px;border-color:rgba(43,33,24,.2);border-top-color:var(--orange);margin:0 auto 14px}
 .gen-card p{font-family:'Special Elite',monospace;font-size:.9rem;color:var(--ink)}
 .gen-card .gen-count{font-size:1.4rem;color:var(--rust);font-weight:700;margin-top:4px}
+
+/* ================= AVISO PÓS-CADASTRO (página pública) ================= */
+.success-card .btn{
+  display:flex;width:100%;max-width:340px;margin-left:auto;margin-right:auto;
+}
+.notice-food{
+  display:flex;gap:12px;align-items:flex-start;text-align:left;
+  background:rgba(217,106,51,.12);border:2px dashed var(--orange);
+  border-radius:12px;padding:14px 16px;margin-bottom:20px;
+}
+.notice-ico{font-size:1.7rem;line-height:1.1;flex:0 0 auto}
+.notice-text strong{
+  display:block;font-family:'Alfa Slab One',serif;font-size:.86rem;
+  color:var(--rust);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;
+}
+.success-card .notice-text p{margin:0;font-size:.92rem;color:var(--ink);line-height:1.5}
+.success-card .notice-cta{
+  font-family:'Special Elite',monospace;font-size:.82rem;
+  color:var(--ink-soft);margin-bottom:12px;line-height:1.5;
+}
+.btn-whats{
+  background:#25D366;color:#08301C;box-shadow:0 4px 0 #128C4A;
+  font-family:'Alfa Slab One',serif;font-weight:400;text-transform:uppercase;
+  font-size:.84rem;letter-spacing:.04em;text-decoration:none;margin-bottom:16px;
+}
+.btn-whats:hover{background:#38E27A}
+.btn-whats svg{width:22px;height:22px;flex:0 0 auto}
+
+/* ================= ORDEM DE CADASTRO / PRESENÇA ================= */
+.ordem-badges{display:flex;flex-wrap:wrap;gap:6px}
+.ord-badge{
+  font-family:'Special Elite',monospace;font-size:.67rem;letter-spacing:.06em;
+  text-transform:uppercase;padding:4px 9px;border-radius:999px;
+  border:2px solid;white-space:nowrap;
+}
+.ord-cad{background:var(--paper-deep);border-color:var(--ink-soft);color:var(--ink)}
+.ord-pre{background:rgba(62,124,70,.16);border-color:var(--ok);color:#2A5730}
+.modal-meta .ordem-badges{margin-bottom:4px}
+
+/* ================= SORTEADOR ================= */
+.raffle-stage{
+  background:var(--cream);border:3px solid var(--ink);border-radius:18px;
+  box-shadow:var(--shadow);padding:22px 18px;text-align:center;
+  max-width:640px;margin:0 auto 28px;
+}
+.raffle-pool{
+  font-family:'Special Elite',monospace;font-size:.78rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;
+}
+.raffle-display{
+  min-height:150px;display:flex;align-items:center;justify-content:center;
+  border:3px dashed var(--teal);border-radius:14px;background:rgba(47,140,140,.06);
+  padding:18px 12px;margin-bottom:18px;overflow:hidden;
+  transition:background .2s,border-color .2s;
+}
+.raffle-display.spinning{background:rgba(217,106,51,.1);border-color:var(--orange)}
+.raffle-idle{font-family:'Special Elite',monospace;font-size:.88rem;color:var(--teal-dark);line-height:1.6}
+.rf-winner{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  width:100%;overflow-wrap:anywhere;animation:fadeUp .25s ease;
+}
+.rf-preview{opacity:.5}
+.rf-tag{
+  font-family:'Alfa Slab One',serif;text-transform:uppercase;
+  letter-spacing:.16em;font-size:.78rem;color:var(--rust);
+}
+.rf-plate{
+  display:inline-block;
+  font-family:'Special Elite',monospace;font-size:1.1rem;letter-spacing:.16em;
+  background:#1E1B17;color:#F2EDE0;border:2px solid #6E675C;border-radius:6px;
+  padding:5px 14px 4px;
+}
+.rf-model{display:block;font-family:'Alfa Slab One',serif;font-size:1rem;color:var(--ink)}
+.rf-owner{display:block;font-size:.88rem;color:var(--ink-soft)}
+.rf-ords{display:block;font-family:'Special Elite',monospace;font-size:.7rem;color:var(--teal-dark)}
+.btn-raffle{
+  width:100%;background:var(--orange);color:#fff;box-shadow:0 4px 0 #A44A1E;
+  font-family:'Alfa Slab One',serif;font-weight:400;
+  text-transform:uppercase;font-size:1.05rem;letter-spacing:.06em;
+}
+.btn-raffle:hover:not(:disabled){background:#E37B45}
+
+.raffle-list-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  max-width:640px;margin:0 auto 12px;
+}
+.raffle-list-head h3{
+  font-family:'Yellowtail',cursive;font-size:1.7rem;color:var(--teal-dark);
+  text-shadow:1px 1px 0 var(--cream);
+}
+.btn-clear-raffle{
+  background:transparent;color:var(--rust);border:2px solid var(--rust);
+  border-radius:999px;padding:8px 16px;min-height:44px;
+  font-size:.8rem;font-weight:700;transition:background .15s,color .15s;
+}
+.btn-clear-raffle:hover{background:rgba(174,66,38,.09)}
+.btn-clear-raffle.armed{background:var(--rust);color:var(--cream);animation:pulse .5s ease}
+
+.raffle-list{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.rf-row{
+  display:flex;align-items:center;gap:12px;
+  background:var(--cream);border:3px solid var(--ink);border-radius:12px;
+  padding:12px 14px;box-shadow:0 4px 0 rgba(43,33,24,.22);
+}
+.rf-pos{
+  flex:0 0 auto;min-width:34px;
+  font-family:'Alfa Slab One',serif;font-size:1.15rem;color:var(--rust);
+}
+.rf-info{
+  display:flex;flex-direction:column;gap:3px;
+  flex:1;min-width:0;text-align:left;overflow-wrap:anywhere;
+}
+.rf-info .rf-plate{align-self:flex-start;font-size:.9rem;padding:3px 10px 2px}
+.rf-info .rf-model{font-size:.92rem}
+.rf-remove{
+  flex:0 0 auto;width:42px;height:42px;border-radius:50%;
+  background:transparent;border:2px solid var(--rust);color:var(--rust);
+  font-weight:700;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.rf-remove:hover{background:var(--rust);color:var(--cream)}
+#raffleEmpty{padding:36px 20px}
+
+/* ================= AJUSTES DE TELA PEQUENA ================= */
+@media (max-width:640px){
+  .tab{font-size:.76rem;padding:13px 6px;letter-spacing:.03em;line-height:1.25}
+  .search-row select{max-width:none}
+}
+@media (max-width:420px){
+  .tab{font-size:.68rem;padding:12px 3px}
+  .raffle-stage{padding:18px 13px}
+  .btn-raffle{font-size:.95rem}
+  .rf-row{gap:9px;padding:10px 11px}
+  .rf-pos{min-width:28px;font-size:1rem}
+  .rf-remove{width:38px;height:38px}
+  .raffle-list-head h3{font-size:1.45rem}
+  .notice-food{padding:12px 13px;gap:10px}
+}
