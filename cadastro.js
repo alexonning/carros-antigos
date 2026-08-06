@@ -67,6 +67,9 @@ $('fVendaNao').addEventListener('click', () => setVenda(false));
 /* ---------------- máscara de telefone ---------------- */
 attachPhoneMask($('fTelefone'));
 
+/* ---------------- limites do campo de ano ---------------- */
+attachAnoLimits($('fAno'), $('anoHint'));
+
 /* ---------------- fotos ---------------- */
 const uploadZone = $('uploadZone');
 const fileInput = $('fFotos');
@@ -130,6 +133,10 @@ $('carForm').addEventListener('submit', async e => {
 
   if (!placa || !modelo || !cor || !ano || !proprietario || !cidade || !telefone){
     showMsg('err','✕ Preencha todos os campos obrigatórios (*).'); return;
+  }
+  if (!isValidAno(ano)){
+    showMsg('err', `✕ O ano deve estar entre ${ANO_MIN} e ${anoMax()}.`);
+    $('fAno').focus(); return;
   }
   if (proprietario.length < MIN_PROPRIETARIO){
     showMsg('err', `✕ O nome do proprietário deve ter no mínimo ${MIN_PROPRIETARIO} caracteres.`);

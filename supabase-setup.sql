@@ -9,7 +9,7 @@
 create table if not exists public.carros (
   id            uuid primary key default gen_random_uuid(),
   placa         text        not null unique,
-  ano           int         not null check (ano between 1900 and 2100),
+  ano           int         not null check (ano between 1800 and 2100),
   modelo        text        not null,
   cor           text        not null,
   dono          text        not null,
@@ -32,6 +32,12 @@ alter table public.carros add column if not exists cidade       text not null de
 alter table public.carros add column if not exists telefone     text not null default '';
 alter table public.carros add column if not exists a_venda      boolean not null default false;
 alter table public.carros add column if not exists origem       text not null default 'organizador';
+
+-- Se a tabela já existia com o limite antigo (1900), libera a partir de 1800.
+-- O teto continua 1900+200 porque um CHECK não pode usar o ano corrente
+-- (não é imutável) — quem barra o futuro é a validação do formulário.
+alter table public.carros drop constraint if exists carros_ano_check;
+alter table public.carros add  constraint carros_ano_check check (ano between 1800 and 2100);
 
 create index if not exists carros_presente_idx  on public.carros (presente);
 create index if not exists carros_criado_em_idx on public.carros (criado_em desc);

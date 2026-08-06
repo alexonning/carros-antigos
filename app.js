@@ -550,6 +550,9 @@ $('fVendaNao').addEventListener('click', () => setVenda(false));
 /* máscara de telefone */
 attachPhoneMask($('fTelefone'));
 
+/* limites do campo de ano */
+attachAnoLimits($('fAno'), $('anoHint'));
+
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); }
@@ -653,6 +656,10 @@ carForm.addEventListener('submit', async e => {
 
   if (!placa || !modelo || !cor || !dono || !ano || !proprietario || !cidade || !telefone){
     showMsg('err','✕ Preencha todos os campos obrigatórios (*).'); return;
+  }
+  if (!isValidAno(ano)){
+    showMsg('err', `✕ O ano deve estar entre ${ANO_MIN} e ${anoMax()}.`);
+    $('fAno').focus(); return;
   }
   if (proprietario.length < MIN_PROPRIETARIO){
     showMsg('err', `✕ O nome do proprietário deve ter no mínimo ${MIN_PROPRIETARIO} caracteres.`);

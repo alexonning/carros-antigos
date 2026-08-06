@@ -5,6 +5,20 @@
 /* Tamanho mínimo do nome do proprietário */
 const MIN_PROPRIETARIO = 6;
 
+/* Faixa de anos aceita: de 1800 até o ano atual (nada no futuro) */
+const ANO_MIN = 1800;
+const anoMax = () => new Date().getFullYear();
+const isValidAno = ano => Number.isInteger(ano) && ano >= ANO_MIN && ano <= anoMax();
+
+/* Aplica os limites ao campo de ano e escreve a dica abaixo dele.
+   Feito por JS para o limite superior acompanhar a virada do ano. */
+function attachAnoLimits(input, hint){
+  if (!input) return;
+  input.min = ANO_MIN;
+  input.max = anoMax();
+  if (hint) hint.textContent = `De ${ANO_MIN} até ${anoMax()}`;
+}
+
 /* Máscara de telefone: (DD) 9XXXX-XXXX ou (DD) XXXX-XXXX */
 function formatPhone(value){
   const d = (value || '').replace(/\D/g, '').slice(0, 11);
